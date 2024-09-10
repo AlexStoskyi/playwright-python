@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         browser: [chromium, firefox, webkit]  # Run on multiple browsers
-        workers: [2]  # Set parallel execution workers
+        workers: [2, 4]  # Parallel execution
 
     steps:
       - name: Checkout Repository
@@ -39,7 +39,7 @@ jobs:
         env:
           BROWSER: ${{ matrix.browser }}
         run: |
-          pytest --browser=${{ matrix.browser }} -n ${{ matrix.workers }} --alluredir=./allure-results
+          pytest --browser=${{ matrix.browser }} --alluredir=./allure-results
 
       - name: Generate Allure Report
         run: |
@@ -52,23 +52,23 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./allure-report
 
-      - name: Send Slack Notification
+      - name: Send Microsoft Teams Notification
         if: failure() || success()
         run: |
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"Playwright tests on ${{ matrix.browser }} completed. Status: ${{ job.status }}. View results: https://github.com/${{ github.repository }}/actions"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+          curl -H "Content-Type: application/json" -d '{"text": "Playwright tests on ${{ matrix.browser }} completed. Status: ${{ job.status }}. View results: https://github.com/${{ github.repository }}/actions"}' ${{ secrets.TEAMS_WEBHOOK_URL }}
 
   notify_on_fail:
     runs-on: ubuntu-latest
     if: failure()
     steps:
-      - name: Send Slack Notification for Failure
+      - name: Send Teams Notification for Failure
         run: |
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"❌ Playwright tests failed! Check logs: https://github.com/${{ github.repository }}/actions"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+          curl -H "Content-Type: application/json" -d '{"text": "❌ Playwright tests failed! Check logs: https://github.com/${{ github.repository }}/actions"}' ${{ secrets.TEAMS_WEBHOOK_URL }}
 
   notify_on_success:
     runs-on: ubuntu-latest
     if: success()
     steps:
-      - name: Send Slack Notification for Success
+      - name: Send Teams Notification for Success
         run: |
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"✅ Playwright tests passed! View results: https://github.com/${{ github.repository }}/actions"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+          curl -H "Content-Type: application/json" -d '{"text": "✅ Playwright tests passed! View results: https://github.com/${{ github.repository }}/actions"}' ${{ secrets.TEAMS_WEBHOOK_URL }}
