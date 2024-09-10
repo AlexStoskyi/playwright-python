@@ -29,7 +29,8 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt || echo "No requirements.txt found, skipping dependencies install."
+          pip install -r requirements.txt  # pytest-xdist must be listed here
+      
 
       # Install Playwright before trying to install its browsers
       - name: Install Playwright
@@ -45,7 +46,8 @@ jobs:
         env:
           BROWSER: ${{ matrix.browser }}
         run: |
-          pytest --browser=${{ matrix.browser }} --workers=${{ matrix.workers }} --alluredir=./allure-results
+          pytest --browser=${{ matrix.browser }} -n 2 --alluredir=./allure-results
+      
 
       - name: Generate Allure Report
         run: |

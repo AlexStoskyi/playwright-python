@@ -13,7 +13,7 @@ user_data = VALID_USER_DATA
 @pytest.mark.asyncio
 async def test_user_login():
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
 
         home_page = HomePage.HomePage(page)
