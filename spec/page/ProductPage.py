@@ -7,7 +7,7 @@ class ProductPage:
         self.page = page
 
     async def is_products_page_visible(self):
-        return await self.page.is_visible("//div[@class'features_items']/h2")
+        return await self.page.is_visible("//div[@class='features_items']/h2")
 
     async def is_products_list_visible(self):
         return await self.page.is_visible("//div[@class='col-sm-9 padding-right']")

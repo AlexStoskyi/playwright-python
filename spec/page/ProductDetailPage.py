@@ -10,7 +10,7 @@ class ProductDetailPage:
 
     async def get_product_details(self):
         name = await self.page.inner_text("//div[@class='product-information']/h2")
-        category = await self.page.inner_text("//div[@class='product-information']/p[@xpath='1']")
+        category = await self.page.inner_text("//div[@class='product-information']/p[1]")
         price = await self.page.inner_text("//div[@class='product-information']/span/span")
         availability = await self.page.inner_text("(//div[@class='product-information']/p/b)[1]")
         condition = await self.page.inner_text("(//div[@class='product-information']/p/b)[2]")
