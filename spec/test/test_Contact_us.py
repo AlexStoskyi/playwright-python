@@ -14,25 +14,12 @@ from spec.page import ContactUsPage
 fake = Faker()
 fake_message = fake.sentence()
 
-import allure
-from allure_commons.types import AttachmentType
-
-@allure.step("Navigating to URL: {url}")
-def go_to_url(browser, url):
-    browser.goto(url)
-    allure.attach(browser.screenshot(), name="Navigating to URL", attachment_type=AttachmentType.PNG)
-
-@allure.step("Performing search for: {search_term}")
-def search(browser, search_term):
-    browser.fill("input[name='search']", search_term)
-    browser.press("Enter")
-    allure.attach(browser.screenshot(), name="Search result screenshot", attachment_type=AttachmentType.PNG)
 
 
 @pytest.mark.asyncio
 async def test_contact_us():
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch(headless=False)
         page = await browser.new_page()
 
         home_page = HomePage.HomePage(page)

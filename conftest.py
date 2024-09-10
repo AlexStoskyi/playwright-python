@@ -1,6 +1,9 @@
 import pytest
 from playwright.sync_api import sync_playwright
+import allure
+from allure_commons.types import AttachmentType
 
+# Fixture for browser setup
 @pytest.fixture(scope="function", params=["chromium", "firefox", "webkit"])
 def browser(request):
     playwright = sync_playwright().start()
@@ -12,12 +15,7 @@ def browser(request):
     browser.close()
     playwright.stop()
 
-
-import pytest
-import allure
-from allure_commons.types import AttachmentType
-
-
+# Hook for taking screenshots on test failure
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     outcome = yield
@@ -25,6 +23,8 @@ def pytest_runtest_makereport(item, call):
 
     # Check if the test has failed
     if report.when == "call" and report.failed:
-        # Take a screenshot when test fails
-        page = item.funcargs['browser']
-        allure.attach(page.screenshot(), name="Failed test screenshot", attachment_type=AttachmentType.PNG)
+        # Check if the browser fixture is available
+        if 'browser' in item.funcargs:
+            page = item.funcargs['browser']
+            # Attach a screenshot of the page
+            allure.attach(page.screenshot(), name="Failed test screenshot", attachment_type=AttachmentType.PNG)
