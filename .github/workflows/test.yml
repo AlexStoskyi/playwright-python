@@ -1,0 +1,75 @@
+name: Playwright Test Automation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]  # Run on multiple browsers
+        workers: [2, 4]  # Parallel execution
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'  # You can change to your Python version
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt  # Ensure you have all necessary dependencies, including Playwright, pytest, allure-pytest
+
+      - name: Install Playwright Browsers
+        run: |
+          python -m playwright install --with-deps
+
+      - name: Run Tests with Pytest and Allure
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: |
+          pytest --browser=${{ matrix.browser }} --workers=${{ matrix.workers }} --alluredir=./allure-results
+
+      - name: Generate Allure Report
+        run: |
+          allure generate ./allure-results -o ./allure-report --clean
+
+      - name: Deploy Allure Report to GitHub Pages
+        if: success()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./allure-report
+
+      - name: Send Slack Notification
+        if: failure() || success()
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Playwright tests on ${{ matrix.browser }} completed. Status: ${{ job.status }}. View results: https://github.com/${{ github.repository }}/actions"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  notify_on_fail:
+    runs-on: ubuntu-latest
+    if: failure()
+    steps:
+      - name: Send Slack Notification for Failure
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"❌ Playwright tests failed! Check logs: https://github.com/${{ github.repository }}/actions"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  notify_on_success:
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: Send Slack Notification for Success
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"✅ Playwright tests passed! View results: https://github.com/${{ github.repository }}/actions"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+
