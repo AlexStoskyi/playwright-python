@@ -1,0 +1,4 @@
+pytest
+pytest-playwright
+allure-pytest
+playwright  # Ensure this line is included
