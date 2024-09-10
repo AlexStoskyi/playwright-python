@@ -19,7 +19,7 @@ fake_message = fake.sentence()
 @pytest.mark.asyncio
 async def test_contact_us():
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
 
         home_page = HomePage.HomePage(page)
